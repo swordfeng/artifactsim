@@ -6,10 +6,13 @@ from typing import List, Tuple
 
 _compiled_func = {}
 
-@numba.njit
+_FASTMATH = False
+
+@numba.njit(fastmath=_FASTMATH)
 def _internal_best_match_internal_numba(c, ars, func):
     max_output = 0.0
     output_idx = [0] * 5
+    # ars4_t = ars[4].transpose()
     for i1, a1 in enumerate(ars[0]):
         s1 = a1
         for i2, a2 in enumerate(ars[1]):
@@ -18,12 +21,13 @@ def _internal_best_match_internal_numba(c, ars, func):
                 s3 = s2 + a3
                 for i4, a4 in enumerate(ars[3]):
                     s4 = s3 + a4
-                    for i5, a5 in enumerate(ars[4]):
-                        a = s4 + a5
-                        output = func(c, a)
-                        if output > max_output:
-                            max_output = output
-                            output_idx = [i1, i2, i3, i4, i5]
+                    # a = ars4_t + s4.reshape((-1, 1))
+                    a = (ars[4] + s4).transpose()
+                    output = func(c, a)
+                    i5 = np.argmax(output)
+                    if output[i5] > max_output:
+                        max_output = output[i5]
+                        output_idx = [i1, i2, i3, i4, i5]
     return max_output, output_idx
 
 def best_match_internal_numba(c: npt.NDArray[np.float64], ars: List[npt.NDArray[np.float64]], formula: str) -> Tuple[float, List[int]]:
@@ -45,6 +49,6 @@ def best_match_internal_numba(c: npt.NDArray[np.float64], ars: List[npt.NDArray[
     if formula in _compiled_func:
         func = _compiled_func[formula]
     else:
-        func = numba.njit(eval(f"lambda c, a: ({formula})"))
+        func = numba.njit(eval(f"lambda c, a: ({formula})"), fastmath=_FASTMATH)
         _compiled_func[formula] = func
     return _internal_best_match_internal_numba(c, numba.typed.List(ars), func)
