@@ -9,9 +9,10 @@ _ARTIFACT_SHAPE = 12
 _BLOCK_DIM = 256
 _compiled_func = {}
 
+_FASTMATH = True
 
 def _gen_kernel_func(eval_func):
-    @cuda.jit
+    @cuda.jit(fastmath=_FASTMATH)
     def kernel_func(ar0, ar1, ar2t, ar3t, ar4t, max_output_res, output_idx_res):
         s2 = cuda.shared.array(_ARTIFACT_SHAPE, numba.float64)
         # ar4tshared = cuda.shared.array((_ARTIFACT_SHAPE, _MAX_N_CIRCLET), numba.float64)
@@ -70,7 +71,7 @@ def _gen_kernel_func(eval_func):
     
     return kernel_func
 
-def best_match_internal_numba(c: npt.NDArray[np.float64], ars: List[npt.NDArray[np.float64]], formula: str) -> Tuple[float, List[int]]:
+def best_match_internal(c: npt.NDArray[np.float64], ars: List[npt.NDArray[np.float64]], formula: str) -> Tuple[float, List[int]]:
     formula = formula.format(**{
         "lvl": c[0],
         "base_hp": c[1],
@@ -87,12 +88,24 @@ def best_match_internal_numba(c: npt.NDArray[np.float64], ars: List[npt.NDArray[
         "hb": f"({c[12]} + a[11])",
     })
 
-    func = cuda.jit(eval(f"lambda a: ({formula})"), device=True)
-    kernel = _gen_kernel_func(func)
+    if formula in _compiled_func:
+        func = _compiled_func[formula]
+    else:
+        func = _gen_kernel_func(cuda.jit(eval(f"lambda a: ({formula})"), device=True, fastmath=_FASTMATH))
+        _compiled_func[formula] = func
 
-    gridDim = ars[0].shape[0] * ars[1].shape[0]
-    max_output_res = np.zeros(gridDim, np.float64)
-    output_idx_res = np.zeros((5, gridDim), np.int32)
-    kernel[gridDim, _BLOCK_DIM](ars[0], ars[1], ars[2].transpose(), ars[3].transpose(), ars[4].transpose(), max_output_res, output_idx_res)
+    stream = cuda.stream()
+    with stream.auto_synchronize():
+        gridDim = ars[0].shape[0] * ars[1].shape[0]
+        max_output_res = cuda.device_array(gridDim, np.float64, stream=stream)
+        output_idx_res = cuda.device_array((5, gridDim), np.int32, stream=stream)
+        ar0 = cuda.to_device(ars[0], stream=stream)
+        ar1 = cuda.to_device(ars[1], stream=stream)
+        ar2t = cuda.to_device(ars[2].transpose(), stream=stream)
+        ar3t = cuda.to_device(ars[3].transpose(), stream=stream)
+        ar4t = cuda.to_device(ars[4].transpose(), stream=stream)
+        func[gridDim, _BLOCK_DIM, stream](ar0, ar1, ar2t, ar3t, ar4t, max_output_res, output_idx_res)
+        max_output_res = max_output_res.copy_to_host(stream=stream)
+        output_idx_res = output_idx_res.copy_to_host(stream=stream)
     max_idx = np.argmax(max_output_res)
     return max_output_res[max_idx], output_idx_res[:, max_idx]

@@ -8,8 +8,8 @@ import random
 import time
 from typing import List, Optional, Tuple, Callable
 
-from best_match_numba_vec import best_match_internal_numba
-bm = best_match_internal_numba
+from best_match_numba_vec import best_match_internal as bm_vec
+from best_match_numba_cuda import best_match_internal as bm_cuda
 
 # Positions
 FLOWER = 0
@@ -318,13 +318,17 @@ if __name__ == "__main__":
     # ]
     # print(ganyu.output())
     ganyu = Ganyu_Amos_Troupe()
+    artifacts = random_artifacts(500)
+
     tic = time.perf_counter()
-    # for _ in range(100):
-    artifacts = random_artifacts(300)
-    max_output, best_artifacts = best_match_opt(ganyu, artifacts, bm)
+    max_output, best_artifacts = best_match_opt(ganyu, artifacts, bm_cuda)
+    toc = time.perf_counter()
     [print(artifact) for artifact in best_artifacts]
     print(max_output)
-    toc = time.perf_counter()
-    max_output, best_artifacts = best_match_opt(ganyu, artifacts, best_match_internal_numba)
-    print(max_output)
     print(toc - tic)
+
+    # tic = time.perf_counter()
+    # max_output, best_artifacts = best_match_opt(ganyu, artifacts, bm_vec)
+    # toc = time.perf_counter()
+    # print(max_output)
+    # print(toc - tic)
