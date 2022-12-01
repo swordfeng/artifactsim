@@ -2,9 +2,8 @@
 
 import pickle
 from collections import defaultdict
+import matplotlib.pyplot as plt
 from lib import *
-from best_match_numba_vec import best_match_internal as bm_vec
-from best_match_numba_cuda import best_match_internal as bm_cuda
 
 if __name__ == "__main__":
     ganyu = Ganyu_Amos_Troupe()
@@ -28,3 +27,5 @@ if __name__ == "__main__":
             pass
     main_stats = sorted(((v, k) for k, v in main_stats.items()), key=lambda t: -t[0])
     [print(f"{k:>6} {str(v):<40} min {min_stats[v]:6.2f} max {max_stats[v]:6.2f}") for k, v in main_stats]
+    plt.hist(output_stats, bins=100, cumulative=True)
+    plt.show()
