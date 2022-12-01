@@ -318,17 +318,18 @@ if __name__ == "__main__":
     # ]
     # print(ganyu.output())
     ganyu = Ganyu_Amos_Troupe()
-    artifacts = random_artifacts(500)
+
+    artifacts = random_artifacts(200)
 
     tic = time.perf_counter()
     max_output, best_artifacts = best_match_opt(ganyu, artifacts, bm_cuda)
     toc = time.perf_counter()
-    [print(artifact) for artifact in best_artifacts]
+    # [print(artifact) for artifact in best_artifacts]
     print(max_output)
     print(toc - tic)
 
-    # tic = time.perf_counter()
-    # max_output, best_artifacts = best_match_opt(ganyu, artifacts, bm_vec)
-    # toc = time.perf_counter()
-    # print(max_output)
-    # print(toc - tic)
+    tic = time.perf_counter()
+    max_output, best_artifacts = best_match_opt(ganyu, artifacts, bm_vec)
+    toc = time.perf_counter()
+    print(max_output)
+    print(toc - tic)
