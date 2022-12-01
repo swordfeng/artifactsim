@@ -6,7 +6,7 @@ from typing import List, Tuple
 
 _compiled_func = {}
 
-_FASTMATH = False
+_FASTMATH = True
 
 @numba.njit(fastmath=_FASTMATH)
 def _internal_best_match_internal_numba(c, ars, func):

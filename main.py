@@ -320,7 +320,7 @@ if __name__ == "__main__":
     ganyu = Ganyu_Amos_Troupe()
     tic = time.perf_counter()
     # for _ in range(100):
-    artifacts = random_artifacts(120)
+    artifacts = random_artifacts(300)
     max_output, best_artifacts = best_match_opt(ganyu, artifacts, bm)
     [print(artifact) for artifact in best_artifacts]
     print(max_output)
