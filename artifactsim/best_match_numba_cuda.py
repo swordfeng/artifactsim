@@ -5,7 +5,9 @@ import numba
 from numba import cuda
 from typing import List, Tuple
 
-_ARTIFACT_SHAPE = 12
+from .constants import ARTIFACT_VEC_MAPPING
+
+_ARTIFACT_SHAPE = len(ARTIFACT_VEC_MAPPING)
 _BLOCK_DIM = 256
 _compiled_func = {}
 

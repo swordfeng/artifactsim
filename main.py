@@ -2,10 +2,8 @@
 
 import time
 
-from lib import *
-from best_match_numba_vec import best_match_internal as bm_vec
-from best_match_numba_cuda import best_match_internal as bm_cuda
-
+from artifactsim import *
+from ganyu import Ganyu_Amos_Troupe
 
 if __name__ == "__main__":
     # ganyu = Ganyu_Amos_Troupe()
@@ -21,15 +19,16 @@ if __name__ == "__main__":
 
     artifacts = random_artifacts(200)
 
-    tic = time.perf_counter()
-    max_output, best_artifacts = best_match_opt(ganyu, artifacts, bm_cuda)
-    toc = time.perf_counter()
-    # [print(artifact) for artifact in best_artifacts]
-    print(max_output)
-    print(toc - tic)
+    for _ in range(10):
+        tic = time.perf_counter()
+        max_output, best_artifacts = best_match(ganyu, artifacts, "gpu")
+        toc = time.perf_counter()
+        [print(artifact) for artifact in best_artifacts]
+        print(max_output, toc - tic)
 
-    tic = time.perf_counter()
-    max_output, best_artifacts = best_match_opt(ganyu, artifacts, bm_vec)
-    toc = time.perf_counter()
-    print(max_output)
-    print(toc - tic)
+        tic = time.perf_counter()
+        max_output, best_artifacts = best_match(ganyu, artifacts, "cpu")
+        toc = time.perf_counter()
+        print(max_output, toc - tic)
+
+        print()
