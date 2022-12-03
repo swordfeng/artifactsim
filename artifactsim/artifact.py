@@ -28,11 +28,11 @@ def new_artifact(pos: Optional[int] = None) -> Artifact:
         additional_props_value=[],
         additional_props_count=[],
     )
-    add_prop(artifact)
-    add_prop(artifact)
-    add_prop(artifact)
+    add_artifact_prop(artifact)
+    add_artifact_prop(artifact)
+    add_artifact_prop(artifact)
     if random.randrange(5) == 0:
-        add_prop(artifact)
+        add_artifact_prop(artifact)
     return artifact
 
 def random_artifacts(n: int = 1) -> List[Artifact]:
@@ -40,11 +40,11 @@ def random_artifacts(n: int = 1) -> List[Artifact]:
     for _ in range(n):
         artifact = new_artifact()
         for __ in range(5):
-            add_prop(artifact)
+            add_artifact_prop(artifact)
         res.append(artifact)
     return res
 
-def add_prop(artifact: Artifact) -> None:
+def add_artifact_prop(artifact: Artifact) -> None:
     if len(artifact.additional_props) < 4:
         dist = {
             prop: weight
