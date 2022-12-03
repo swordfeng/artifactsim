@@ -17,7 +17,8 @@ def _gen_kernel_func(eval_func):
     @cuda.jit(fastmath=_FASTMATH)
     def kernel_func(ar0, ar1, ar2t, ar3t, ar4t, max_output_res, output_idx_res):
         s2 = cuda.shared.array(_ARTIFACT_SHAPE, numba.float64)
-        # ar4tshared = cuda.shared.array((_ARTIFACT_SHAPE, _MAX_N_CIRCLET), numba.float64)
+        s4 = cuda.local.array(_ARTIFACT_SHAPE, numba.float64)
+        a = cuda.local.array(_ARTIFACT_SHAPE, numba.float64)
         shared_max_output = cuda.shared.array(_BLOCK_DIM, numba.float64)
         shared_output_idx = cuda.shared.array((5, _BLOCK_DIM), numba.int32)
         threadIdx = cuda.threadIdx.x
@@ -29,22 +30,13 @@ def _gen_kernel_func(eval_func):
             for i in range(_ARTIFACT_SHAPE):
                 s2[i] = ar0[i1][i] + ar1[i2][i]
         cuda.syncthreads()
-        # for j in range(threadIdx, ar4t.shape[1], blockDim):
-        #     for i in range(_ARTIFACT_SHAPE):
-        #         ar4tshared[i][j] = ar4t[i][j]
-        # cuda.syncthreads()
-        s2local = cuda.local.array(_ARTIFACT_SHAPE, numba.float64)
-        s4 = cuda.local.array(_ARTIFACT_SHAPE, numba.float64)
-        a = cuda.local.array(_ARTIFACT_SHAPE, numba.float64)
         max_output = 0.0
         output_idx = cuda.local.array(5, numba.int32)
-        for i in range(_ARTIFACT_SHAPE):
-            s2local[i] = s2[i]
         for it in range(threadIdx, ar2t.shape[1] * ar3t.shape[1], blockDim):
             i3 = it // ar3t.shape[1]
             i4 = it % ar3t.shape[1]
             for i in range(_ARTIFACT_SHAPE):
-                s4[i] = s2local[i] + ar2t[i][i3] + ar3t[i][i4]
+                s4[i] = s2[i] + ar2t[i][i3] + ar3t[i][i4]
             for i5 in range(ar4t.shape[1]):
                 for i in range(_ARTIFACT_SHAPE):
                     a[i] = s4[i] + ar4t[i][i5]
