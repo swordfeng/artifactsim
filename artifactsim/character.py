@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from dataclasses import dataclass, field
-from typing import List
+from typing import List, Sequence
 
 from .artifact import Artifact, get_artifacts_prop
 from .constants import *
@@ -78,3 +78,33 @@ class Character:
             })
             self._output_func = eval("lambda c: (" + formula + ")")
         return self._output_func(self)
+
+    def eff_props(self) -> Sequence[str]:
+        if not hasattr(self, "_eff_props"):
+            props = set()
+            formula = self.output_formula().format(**{
+                "lvl": 90,
+                "base_hp": 10000.0,
+                "hp": "(add('HPP') or 0.0)",
+                "base_atk": 200.0,
+                "atk": "(add('ATKP') or 0.0)",
+                "base_def": 200.0,
+                "def": "(add('DEFP') or 0.0)",
+                "er": "(add('ER') or 0.0)",
+                "em": "(add('EM') or 0.0)",
+                "edmg": "(add('EDMG') or 0.0)",
+                "cr": "(add('CR') or 0.0)",
+                "cdmg": "(add('CDMG') or 0.0)",
+                "hb": "(add('HB') or 0.0)",
+            })
+            eval(f"lambda add: ({formula})")(props.add)
+            self._eff_props = tuple(props)
+        return self._eff_props
+    
+    def eff_props_small(self) -> Sequence[str]:
+        mapping = {HPP: HP, ATKP: ATK, DEFP: DEF}
+        return tuple(
+            mapping[prop]
+            for prop in self.eff_props()
+            if prop in mapping
+        )

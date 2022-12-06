@@ -22,6 +22,7 @@ class Ganyu_Amos_Troupe(Character):
         return super().disp_atk + self.base_atk * 49.6 / 100.0 + self.base_atk * 0.25
     
     def output_formula(self) -> str:
+        # AZ 霜华绽放 融化
         return """
             ({atk} * 3.92)
             * (1.0 + 0.12 + 0.08 * 3 + 0.35 + {edmg} / 100.0)

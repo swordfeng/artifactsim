@@ -4,13 +4,15 @@ import sys
 import time
 import pickle
 import threading
+import traceback
 import multiprocessing
 import numba.cuda
 
 from artifactsim import *
-from ganyu import Ganyu_Amos_Troupe
+# from ganyu import Ganyu_Amos_Troupe
+from xiangling import Xiangling_TheCatch_SeveredFate
 
-CPU_THREADS = 24
+CPU_THREADS = 32
 GPU_THREADS = 2
 
 ARTIFACT_COUNT = 200
@@ -25,18 +27,18 @@ def task(c, search_method, output_queue):
             toc = time.perf_counter()
             output_queue.put((max_output, best_artifacts, toc - tic))
     except:
-        pass
+        traceback.print_exc()
 
 if __name__ == "__main__":
-    ganyu = Ganyu_Amos_Troupe()
+    xiangling = Xiangling_TheCatch_SeveredFate()
     q = multiprocessing.Queue(maxsize=64)
     numba.cuda.synchronize()
 
     for _ in range(CPU_THREADS):
-        t = multiprocessing.Process(target=task, args=(ganyu, "cpu", q), daemon=True)
+        t = multiprocessing.Process(target=task, args=(xiangling, "cpu", q), daemon=True)
         t.start()
     for _ in range(GPU_THREADS):
-        t = threading.Thread(target=task, args=(ganyu, "gpu", q), daemon=True)
+        t = threading.Thread(target=task, args=(xiangling, "gpu", q), daemon=True)
         t.start()
 
     with open(sys.argv[1], "wb") as f:
