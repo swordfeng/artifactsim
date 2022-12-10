@@ -10,7 +10,8 @@ import numba.cuda
 
 from artifactsim import *
 # from ganyu import Ganyu_Amos_Troupe
-from xiangling import Xiangling_TheCatch_SeveredFate
+# from xiangling import Xiangling_TheCatch_SeveredFate
+from keqing import Keqing_JadeCutter_ThunderingFury
 
 CPU_THREADS = 32
 GPU_THREADS = 2
@@ -30,18 +31,19 @@ def task(c, search_method, output_queue):
         traceback.print_exc()
 
 if __name__ == "__main__":
-    xiangling = Xiangling_TheCatch_SeveredFate()
+    c = Keqing_JadeCutter_ThunderingFury()
     q = multiprocessing.Queue(maxsize=64)
     numba.cuda.synchronize()
 
     for _ in range(CPU_THREADS):
-        t = multiprocessing.Process(target=task, args=(xiangling, "cpu", q), daemon=True)
+        t = multiprocessing.Process(target=task, args=(c, "cpu", q), daemon=True)
         t.start()
     for _ in range(GPU_THREADS):
-        t = threading.Thread(target=task, args=(xiangling, "gpu", q), daemon=True)
+        t = threading.Thread(target=task, args=(c, "gpu", q), daemon=True)
         t.start()
 
     with open(sys.argv[1], "wb") as f:
+        pickle.dump(type(c), f)
         tic = time.perf_counter()
         for i in range(BEST_SET_COUNT):
             max_output, best_artifacts, time_elapsed = q.get()

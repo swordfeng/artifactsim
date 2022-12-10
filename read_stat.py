@@ -7,19 +7,19 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from artifactsim import *
-# from ganyu import Ganyu_Amos_Troupe
-from xiangling import Xiangling_TheCatch_SeveredFate
 
 if __name__ == "__main__":
     artifacts_list = []
     with open(sys.argv[1], "rb") as f:
+        CharacterClass = pickle.load(f)
         try:
             while True:
                 artifacts_list.append(pickle.load(f))
         except EOFError:
             pass
+    print(f"Artifact sets loaded: {len(artifacts_list)}")
 
-    c = Xiangling_TheCatch_SeveredFate()
+    c = CharacterClass()
 
     output_stats = []
     main_stats = defaultdict(lambda: 0)
@@ -94,7 +94,7 @@ if __name__ == "__main__":
     print(f"Double CRIT: " + str(double_crit))
     print(f"Double CRIT avg score: " + str([s / c for s, c in zip(double_crit_score, double_crit)]))
     print(f"No CRIT: " + str([9000 - s - d for s, d in zip(single_crit, double_crit)]))
-    fig, axis = plt.subplots(2, 1)
+    fig, axis = plt.subplots(2, 1, figsize=(6.4, 8.8))
     axis[0].set_xlim([min(output_stats), max(output_stats)])
     axis[0].hist(output_stats, bins=100, density=True, cumulative=False)
     axis[0].set_title("Distribution")
