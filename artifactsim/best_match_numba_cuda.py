@@ -13,6 +13,13 @@ _compiled_func = {}
 
 _FASTMATH = True
 
+_eval_globals = {
+    "where": cuda.jit(lambda cond, x, y: x if cond else y, True),
+    "clip": cuda.jit(lambda a, a_min, a_max: min(a_max, max(a, a_min)), True),
+    "min": min,
+    "max": max,
+}
+
 def _gen_kernel_func(eval_func):
     @cuda.jit(fastmath=_FASTMATH)
     def kernel_func(ar0, ar1, ar2t, ar3t, ar4t, max_output_res, output_idx_res):
@@ -85,7 +92,7 @@ def best_match_internal(c: npt.NDArray[np.float64], ars: List[npt.NDArray[np.flo
     if formula in _compiled_func:
         func = _compiled_func[formula]
     else:
-        func = _gen_kernel_func(cuda.jit(eval(f"lambda a: ({formula})"), device=True, fastmath=_FASTMATH))
+        func = _gen_kernel_func(cuda.jit(eval(f"lambda a: ({formula})", _eval_globals), device=True, fastmath=_FASTMATH))
         _compiled_func[formula] = func
 
     stream = cuda.stream()

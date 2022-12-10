@@ -2,6 +2,13 @@ import numpy as np
 import numpy.typing as npt
 from typing import List, Tuple
 
+_eval_globals = {
+    "where": np.where,
+    "clip": np.clip,
+    "min": np.minimum,
+    "max": np.maximum,
+}
+
 def best_match_internal(c: npt.NDArray[np.float64], ars: List[npt.NDArray[np.float64]], formula: str) -> Tuple[float, List[int]]:
     formula = formula.format(**{
         "lvl": c[0],
@@ -18,7 +25,7 @@ def best_match_internal(c: npt.NDArray[np.float64], ars: List[npt.NDArray[np.flo
         "cdmg": f"({c[11]} + a[10])",
         "hb": f"({c[12]} + a[11])",
     })
-    eval_func = eval(f"lambda a: ({formula})")
+    eval_func = eval(f"lambda a: ({formula})", _eval_globals)
     max_output = 0.0
     output_idx = [0] * 5
     for i1, a1 in enumerate(ars[0]):

@@ -8,6 +8,13 @@ _compiled_func = {}
 
 _FASTMATH = True
 
+_eval_globals = {
+    "where": np.where,
+    "clip": np.clip,
+    "min": np.minimum,
+    "max": np.maximum,
+}
+
 def _gen_func(eval_func):
     @numba.njit(fastmath=_FASTMATH)
     def func(ars):
@@ -50,6 +57,6 @@ def best_match_internal(c: npt.NDArray[np.float64], ars: List[npt.NDArray[np.flo
     if formula in _compiled_func:
         func = _compiled_func[formula]
     else:
-        func = _gen_func(numba.njit(eval(f"lambda a: ({formula})"), fastmath=_FASTMATH))
+        func = _gen_func(numba.njit(eval(f"lambda a: ({formula})", _eval_globals), fastmath=_FASTMATH))
         _compiled_func[formula] = func
     return func(numba.typed.List(ars))
