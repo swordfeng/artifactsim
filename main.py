@@ -17,9 +17,10 @@ if __name__ == "__main__":
     # print(ganyu.output())
     ganyu = Ganyu_Amos_Troupe()
 
-    artifacts = random_artifacts(200)
-
     for _ in range(10):
+        artifacts = random_artifacts(500)
+        artifacts = [a for a, f in zip(artifacts, filters.no_better_artifact(ganyu, artifacts)) if f]
+        
         tic = time.perf_counter()
         max_output, best_artifacts = best_match(ganyu, artifacts, "gpu")
         toc = time.perf_counter()
