@@ -6,7 +6,12 @@ from .constants import EDMG, HPP, HP, ATKP, ATK, DEFP, DEF
 from .character import Character
 from .artifact import Artifact
 
-from typing import List
+from typing import List, Callable
+
+def apply_filters(character: Character, artifacts: List[Artifact], filter_funcs: List[Callable]) -> List[Artifact]:
+    for f in filter_funcs:
+        artifacts = [a for a, keep in zip(artifacts, f(character, artifacts)) if keep]
+    return artifacts
 
 def effective_prop_exists(c: Character, ars: List[Artifact]) -> List[bool]:
     return [
