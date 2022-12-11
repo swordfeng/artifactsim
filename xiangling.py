@@ -17,6 +17,11 @@ class Xiangling_TheCatch_SeveredFate(Character):
             hb=0.0,
         )
     
+    @Character.disp_atk.getter
+    def disp_atk(self) -> float:
+        # 双火 班尼特原木刀天赋12
+        return super().disp_atk + self.base_atk * 0.25 + 846.7
+    
     def output_formula(self) -> str:
         # Q 旋火轮 融化
         return """
