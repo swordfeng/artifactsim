@@ -67,9 +67,9 @@ if __name__ == "__main__":
             for idx, prop in enumerate(a.additional_props):
                 if prop in (CR, CDMG):
                     crit += a.additional_props_count[idx]
-                if prop in c.eff_props():
+                if prop in c.eff_props:
                     eff += a.additional_props_count[idx]
-                if prop in c.eff_props_small():
+                if prop in c.eff_props_small:
                     eff += a.additional_props_count[idx] / 2
         crit_stats[mains] += crit
         min_crit_stats[mains] = min(min_crit_stats[mains], crit)

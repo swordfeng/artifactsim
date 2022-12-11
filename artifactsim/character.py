@@ -79,6 +79,7 @@ class Character:
             self._output_func = eval("lambda c: (" + formula + ")")
         return self._output_func(self)
 
+    @property
     def eff_props(self) -> Sequence[str]:
         if not hasattr(self, "_eff_props"):
             props = set()
@@ -101,10 +102,11 @@ class Character:
             self._eff_props = tuple(props)
         return self._eff_props
     
+    @property
     def eff_props_small(self) -> Sequence[str]:
         mapping = {HPP: HP, ATKP: ATK, DEFP: DEF}
         return tuple(
             mapping[prop]
-            for prop in self.eff_props()
+            for prop in self.eff_props
             if prop in mapping
         )
