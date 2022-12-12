@@ -76,7 +76,13 @@ class Character:
                 "cdmg": "c.disp_cdmg",
                 "hb": "c.disp_hb",
             })
-            self._output_func = eval("lambda c: (" + formula + ")")
+            _eval_globals = {
+                "where": lambda cond, x, y: x if cond else y,
+                "clip": lambda a, a_min, a_max: min(a_max, max(a, a_min)),
+                "min": min,
+                "max": max,
+            }
+            self._output_func = eval("lambda c: (" + formula + ")", _eval_globals)
         return self._output_func(self)
 
     @property
